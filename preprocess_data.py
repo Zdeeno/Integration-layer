@@ -4,7 +4,7 @@ import numpy as np
 import torch
 
 
-filename = "../trump.json"
+filename = "./trump.json"
 cuda = torch.device('cuda')
 
 
@@ -47,6 +47,7 @@ def create_corpus(dataset):
         for word in tweet:
             if word not in corpus:
                 corpus.append(word)
+    corpus.append("EOT")
     return corpus
 
 
@@ -58,7 +59,12 @@ def create_learning_tensors(dataset, corpus):
         for word in tweet:
             vec = np.zeros(c_len)
             vec[corpus.index(word)] = 1
-            vecs.append(torch.from_numpy(vec).float().view(1, c_len).cuda())
+            vecs.append(torch.from_numpy(vec).float().view(1, c_len))
+        # add end of tweet
+        vec = np.zeros(c_len)
+        vec[-1] = 1
+        vecs.append(torch.from_numpy(vec).float().view(1, c_len))
+
         ret.append(vecs)
     return ret
 

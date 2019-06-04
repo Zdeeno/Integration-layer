@@ -4,6 +4,8 @@ import math
 from torch.autograd import Function
 from torch.nn import Module, Parameter, init, CrossEntropyLoss, ModuleList, Linear
 
+cuda = torch.device('cuda')
+
 
 # Network
 class Net(Module):
@@ -43,7 +45,7 @@ class Integrating(Module):
         self.in_features = in_features
         self.out_features = out_features
         self.weight = Parameter(torch.Tensor(out_features, in_features).float())
-        self.potential = torch.Tensor(out_features).float()
+        self.potential = torch.Tensor(out_features).float().to(cuda)
         self.p_thresh = p_thresh
         self.reset_parameters()
         self.prev_layer = prev_layer

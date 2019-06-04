@@ -4,10 +4,11 @@ import torch
 import preprocess_data
 
 EPOCH_NUM = 10
-HIDDEN_LAYER = 1000
+HIDDEN_LAYER = 512
+
 
 def get_idx(output):
-    idx = np.argmax(output.data.numpy())
+    idx = np.argmax(output.cpu().data.numpy())
     return idx
 
 
@@ -18,7 +19,8 @@ if __name__ == '__main__':
 
     dataset, corpus = preprocess_data.get_learning_data()
     c_size = len(corpus)
-    network = Net(c_size, [HIDDEN_LAYER], c_size, 0.001)
+    network = Net(c_size, [HIDDEN_LAYER], c_size, 0.0003)
+    network.to(cuda)
     print(network)
 
     min_err = float('Inf')
@@ -26,17 +28,18 @@ if __name__ == '__main__':
     for epoch in range(EPOCH_NUM):
         print("----- Epoch No. " + str(epoch) + " -----")
         network.reset_potentials()
-        network.cuda()
 
         for tweet in dataset:
             err = 0
             pred_idx = None
             for vector in tweet:
+                vector = vector.to(cuda)
                 network.optimizer.zero_grad()
 
                 if pred_idx is not None:
                     next_idx = get_idx(vector)
-                    loss = network.loss(net_output, torch.LongTensor([next_idx], device=cuda))
+                    target = torch.LongTensor([next_idx]).to(cuda)
+                    loss = network.loss(net_output, target)
                     loss.backward()
                     network.optimizer.step()
 
@@ -46,8 +49,8 @@ if __name__ == '__main__':
                 net_output = network(vector)
                 pred_idx = get_idx(net_output)
 
-            print(err/(len(tweet) - 1.0))
-
+            print(len(tweet) - err, "/", len(tweet))
+        torch.save(network.state_dict(), "./my_net_" + str(epoch))
 """
     # Evaluate
     network.reset_potentials()
