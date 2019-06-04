@@ -33,6 +33,7 @@ if __name__ == '__main__':
             err = 0
             pred_idx = None
             for vector in tweet:
+                vector = vector.to_dense().view(1, c_size)
                 vector = vector.to(cuda)
                 network.optimizer.zero_grad()
 
