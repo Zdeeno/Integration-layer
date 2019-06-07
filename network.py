@@ -14,10 +14,13 @@ class Net(Module):
         super(Net, self).__init__()
         max_potential = 3.0
         self.layers = ModuleList()
-        self.layers.append(Integrating(input_size, hidden_sizes[0], max_potential))
 
-        for i in range(len(hidden_sizes) - 1):
-            layer = Integrating(hidden_sizes[i], hidden_sizes[i+1], max_potential, self.layers[-1])
+        linear = Linear(input_size, hidden_sizes[0])
+        self.layers.append(linear)
+
+        for i in range(len(hidden_sizes)):
+
+            layer = Integrating(hidden_sizes[i], hidden_sizes[i], max_potential)
             self.layers.append(layer)
 
         # self.layers.append(Integrating(hidden_sizes[-1], output_size, max_potential, self.layers[-1]))

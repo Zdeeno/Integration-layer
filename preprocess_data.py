@@ -55,12 +55,14 @@ def create_learning_tensors(dataset, corpus):
     c_len = len(corpus)
     ret = []
     for tweet in dataset:
-        vecs = []
+        indices = []
+        i = 0
         for word in tweet:
             idx = corpus.index(word)
-            vecs.append(torch.sparse.FloatTensor(torch.LongTensor([[idx]]), torch.FloatTensor([1.0]), torch.Size([c_len])))
-
-        vecs.append(torch.sparse.FloatTensor(torch.LongTensor([[c_len-1]]), torch.FloatTensor([1.0]), torch.Size([c_len])))
+            indices.append([i, idx])
+            i += 1
+        indices.append([i, c_len - 1])
+        vecs = torch.sparse.FloatTensor(torch.LongTensor(indices), torch.FloatTensor([1.0 for t in range(i)]), torch.Size([i, c_len]))
         ret.append(vecs)
     return ret
 
