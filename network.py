@@ -101,4 +101,4 @@ class IntegrateFunction(Function):
         if ctx.needs_input_grad[1]:
             grad_weight = grad.t().mm(input)
 
-        return grad_input, grad_weight, None, None, None
+        return grad_input, grad_weight, None, None

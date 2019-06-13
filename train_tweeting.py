@@ -2,6 +2,7 @@ from network import Net
 import numpy as np
 import torch
 import preprocess_data
+import random
 
 EPOCH_NUM = 100
 HIDDEN_LAYER = 2048
@@ -20,7 +21,7 @@ if __name__ == '__main__':
 
     dataset, corpus = preprocess_data.get_learning_data()
     c_size = len(corpus)
-    network = Net(c_size, [HIDDEN_LAYER], c_size, 0.001)
+    network = Net(c_size, [HIDDEN_LAYER], c_size, 0.0003)
     network.to(cuda)
     print(network)
 
@@ -30,13 +31,14 @@ if __name__ == '__main__':
         print("----- Epoch No. " + str(epoch) + " -----")
         epoch_err = 0
         tweet_num = 1
+        random.shuffle(dataset)
 
         for tweet in dataset:
             network.reset_potentials()
             tweet_err = 0
             pred_idx = None
             tweet = tweet.to_dense().to(cuda)
-            for vec_idx in range(tweet.size[0]):
+            for vec_idx in range(tweet.size()[0]):
 
                 if pred_idx is not None:
                     next_idx = get_idx(tweet[vec_idx])
@@ -48,17 +50,18 @@ if __name__ == '__main__':
                         tweet_err += 1
                         epoch_err += 1
 
-                net_output = network(tweet[vec_idx])
+                net_output = network(tweet[vec_idx].view(1, -1))
                 pred_idx = get_idx(net_output)
 
             if tweet_num % 5 == 0:
-                print("optimizing after tweet number", tweet_num)
+                print("optimizing after tweet num: ", tweet_num)
                 network.optimizer.step()
                 network.optimizer.zero_grad()
 
-            print(len(tweet) - tweet_err, "/", len(tweet))
+            tweet_num += 1
+            # print(len(tweet) - tweet_err, "/", len(tweet))
         print("Epoch No.", epoch, "had", epoch_err, "errors")
-        torch.save(network.state_dict(), "./my_net_" + str(epoch))
+        torch.save(network.state_dict(), "./my_net_v2_" + str(epoch))
 """
     # Evaluate
     network.reset_potentials()
